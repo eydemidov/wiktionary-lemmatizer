@@ -72,22 +72,18 @@ class WiktionaryLemmatizator < Nokogiri::XML::SAX::Document
   # Find if the current word actually belongs to a language and send the appropriate form to store
   def find_word
     if @text.match(/\=\=#{@language}\=\=/i)
+     	# Easen regexp to avoid end page match
+    	@text << "\n----"
 
-      # Easen regexp to avoid end page match
-      @text << "\n----"
+      	language_segment = @text.match(/\=\=#{@language}\=\=([\S\s]+?)(?=(?:\n----)|(?:\n\=\=\w+\=\=))/i)[1]
 
-      language_segment = @text.match(/\=\=#{@language}\=\=([\S\s]+?)(?=(?:\n----)|(?:\n\=\=\w+\=\=))/i)[1]
+	  	lemma = find_lemma_word(language_segment)
 
-      # Don't store borrowings from English, they are mostly modern and distort the frequency list
-      unless language_segment.match(/(from\s(english\s?)?{(({en\|[^{]*?})|({[^{]*?\|en\|[^}]*?})|({[^}]*?\|en}))})|(borrowing\|en)/i)
-        lemma = find_lemma_word(language_segment)
-
-        if lemma
-          store_word(lemma)
-        else
-          store_word(@title)
-        end
-      end
+		if lemma
+		  store_word(lemma)
+		else
+		  store_word(@title)
+		end
     end
   end
 
