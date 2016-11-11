@@ -53,7 +53,7 @@ class WiktionaryLemmatizator < Nokogiri::XML::SAX::Document
   # If multiple etimologies present, grab the first one as it is most likely more widespread definition.
   def find_lemma_word(page)
     etimology = page.match(/\=\=\=Etymology(?:\s\d)?\=\=\=([\S\s]+?)(?=(?:\n----)|(?:\n\=\=\=Etymology(?:\s\d)?\=\=\=))/)
-    text = etimology ? etimology.to_s : page
+    text = if etimology then etimology.to_s else page end
 
     word_of_r = /#\s? {{.*of\|(.*?\w+.*?)}}/
     word_of = text.match(word_of_r)
@@ -91,12 +91,10 @@ class WiktionaryLemmatizator < Nokogiri::XML::SAX::Document
   def store_word(word)
     existing_index = @lemmas[word]
 
-    if existing_index
-      @index > existing_index ? @lemmas[word] = @index : nil
-    else
+    if !existing_index
       @lemmas[word] = @index
-
-      puts "#{@lemmas.length} words stored"
+    elsif @index > existing_index
+      @lemmas[word] = @index
     end
   end
 
